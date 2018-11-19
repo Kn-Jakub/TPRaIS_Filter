@@ -10,20 +10,27 @@
 
 #include "fsl_i2c.h"
 
-#define SIZE_OF_BUFFER   25
+static volatile  bool completionFlag;
+static volatile bool nakFlag;
+static void master_callback(I2C_Type *base, i2c_master_handle_t *handle, status_t status, void *userData);
+
 
 class I2C {
 public:
-	I2C();
+	I2C(uint32_t clockRate);
 	~I2C();
-	void init(uint8_t slaveAddress);
-	uint8_t write(int addr, uint8_t*  buff, uint8_t size);
-	uint8_t read(int addr, uint8_t*  buff, uint8_t size);
-
+	uint8_t write(uint8_t device_adrr, uint8_t reg_addr, uint8_t value, uint8_t size, uint32_t flags );
+	uint8_t read(uint8_t device_adrr, uint8_t reg_addr, uint8_t*  buff, uint8_t size, uint32_t flags );
+private:
+	void ReleaseBus(void);
+	void ConfigurePins(void);
+	void release_bus_delay(void); //static
 private:
 	i2c_master_transfer_t m_MasterTransfer;
 	i2c_master_config_t m_masterConfig;
-	uint8_t m_buffer[SIZE_OF_BUFFER];
+	i2c_master_handle_t m_handle;
 };
+
+
 
 #endif /* I2C_H_ */

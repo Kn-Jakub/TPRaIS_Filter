@@ -56,10 +56,10 @@
 <booleanAttribute key="org.eclipse.cdt.dsf.gdb.UPDATE_THREADLIST_ON_SUSPEND" value="false"/>
 <intAttribute key="org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR" value="2"/>
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="remote"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="Debug/MKL25Z128xxx4_Akcelerometer.axf"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="MKL25Z128xxx4_Akcelerometer"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="Debug/TPRaIS_Semestralka.axf"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="TPRaIS_Semestralka"/>
 <booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="false"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="com.crt.advproject.config.exe.debug.1066678380"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="com.crt.advproject.config.exe.debug.2051961651"/>
 <mapAttribute key="org.eclipse.debug.core.preferred_launchers">
 <mapEntry key="[debug]" value="com.nxp.mcuxpresso.core.debug.support.segger.dsfLaunchDelegate"/>
 </mapAttribute>

@@ -6,7 +6,7 @@
 CPP_SRCS += \
 ../source/I2C.cpp \
 ../source/MMA8451Q.cpp \
-../source/main_Akcelerometer.cpp 
+../source/TPRaIS_Semestralka.cpp 
 
 C_SRCS += \
 ../source/mtb.c \
@@ -15,14 +15,14 @@ C_SRCS += \
 OBJS += \
 ./source/I2C.o \
 ./source/MMA8451Q.o \
-./source/main_Akcelerometer.o \
+./source/TPRaIS_Semestralka.o \
 ./source/mtb.o \
 ./source/semihost_hardfault.o 
 
 CPP_DEPS += \
 ./source/I2C.d \
 ./source/MMA8451Q.d \
-./source/main_Akcelerometer.d 
+./source/TPRaIS_Semestralka.d 
 
 C_DEPS += \
 ./source/mtb.d \

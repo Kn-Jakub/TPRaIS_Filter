@@ -53,8 +53,6 @@ public:
   /**
   * MMA8451Q constructor
   *
-  * @param sda SDA pin
-  * @param sdl SCL pin
   * @param addr addr of the I2C peripheral
   */
   MMA8451Q( int addr);
@@ -70,6 +68,11 @@ public:
    * @returns WHO_AM_I value
    */
   uint8_t getWhoAmI();
+
+  /**
+   *
+   */
+  void init();
 
   /**
    * Get X axis acceleration

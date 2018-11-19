@@ -17,34 +17,95 @@
 */
 
 #include "MMA8451Q.h"
+#include "fsl_debug_console.h"
 
 
-#define REG_WHO_AM_I      0x0D
-#define REG_CTRL_REG_1    0x2A
+#define REG_WHO_AM_I      0x0DU
+#define REG_CTRL_REG_1    0x2AU
 #define REG_OUT_X_MSB     0x01
 #define REG_OUT_Y_MSB     0x03
 #define REG_OUT_Z_MSB     0x05
-#define MMA8451_I2C_ADDRESS (0x1d<<1)
+#define REG_XYZ			  0x0EU
+#define REG_ACCEL_STATUS  0x00U
 
 #define UINT14_MAX        16383
 
-MMA8451Q::MMA8451Q(int addr) : m_addr(addr),m_I2C() {
-    // activate the peripheral
-    uint8_t data[2] = {REG_CTRL_REG_1, 0x01};
-    writeRegs(data, 2);
-    m_I2C.init(uint8_t(MMA8451_I2C_ADDRESS)); 	// Address of accelerometer
+#define ACCEL_I2C_CLK_FREQ CLOCK_GetFreq(I2C0_CLK_SRC)
+
+
+MMA8451Q::MMA8451Q(int addr) : m_addr(addr),m_I2C((uint32_t)ACCEL_I2C_CLK_FREQ) {
+
 }
 
 MMA8451Q::~MMA8451Q() { }
 
-uint8_t MMA8451Q::getWhoAmI() {
-    uint8_t who_am_i = 0;
-    readRegs(REG_WHO_AM_I, &who_am_i, 1);
-    return who_am_i;
+void MMA8451Q::init()
+{
+	/*  please refer to the "example FXOS8700CQ Driver Code" in FXOS8700 datasheet. */
+	/*  write 0000 0000 = 0x00 to accelerometer control register 1 */
+	/*  standby */
+	/*  [7-1] = 0000 000 */
+	/*  [0]: active=0 */
+	PRINTF("INIT 0 \r\n");
+	uint8_t value = 0;
+	m_I2C.write(m_addr, REG_CTRL_REG_1, value, 1, kI2C_TransferDefaultFlag);
+	/*  write 0000 0001= 0x01 to XYZ_DATA_CFG register */
+	/*  [7]: reserved */
+	/*  [6]: reserved */
+	/*  [5]: reserved */
+	/*  [4]: hpf_out=0 */
+	/*  [3]: reserved */
+	/*  [2]: reserved */
+	/*  [1-0]: fs=01 for accelerometer range of +/-4g range with 0.488mg/LSB */
+	/*  databyte = 0x01; */
+	PRINTF("INIT 1 \r\n");
+	value = 0x01;
+	m_I2C.write(m_addr, REG_XYZ , value, 1,  kI2C_TransferDefaultFlag);
+    /*  write 0000 1101 = 0x0D to accelerometer control register 1 */
+	/*  [7-6]: aslp_rate=00 */
+	/*  [5-3]: dr=001 for 200Hz data rate (when in hybrid mode) */
+	/*  [2]: lnoise=1 for low noise mode */
+	/*  [1]: f_read=0 for normal 16 bit reads */
+	/*  [0]: active=1 to take the part out of standby and enable sampling */
+	/*   databyte = 0x0D; */
+	PRINTF("INIT 2 \r\n");
+	value = 0x0d;
+	m_I2C.write(m_addr, REG_CTRL_REG_1, value, 1, kI2C_TransferDefaultFlag);
+	PRINTF("INIT end \r\n");
+
 }
 
-float MMA8451Q::getAccX() {
-    return (float(getAccAxis(REG_OUT_X_MSB))/4096.0);
+uint8_t MMA8451Q::getWhoAmI() {
+  uint8_t who_am_i = 0;
+//    readRegs(REG_WHO_AM_I, &who_am_i, 1);
+	const uint8_t accel_address = 0x1DU;
+	uint8_t writeReturn = 0;
+	writeReturn = m_I2C.write(m_addr, 255, accel_address, 1, kI2C_TransferNoStopFlag);
+	if(writeReturn == 1)
+	{
+		PRINTF("ACCEL is connected and connection was successful created \r\n");
+		m_I2C.read(m_addr, 255, &who_am_i, 1, kI2C_TransferRepeatedStartFlag);
+		PRINTF("WHO I AM value: 0x%x .\r\n",who_am_i);
+		return accel_address;
+	}else{
+		PRINTF("Problem with connecting to accel\n\r");
+		return 0;
+	}
+
+}
+
+float MMA8451Q::getAccX()
+{
+	uint8_t status_value = 0;
+	uint8_t buff[7];
+	while (status_value != 0xff)
+	{
+		m_I2C.read(m_addr, REG_ACCEL_STATUS, &status_value, 1, kI2C_TransferDefaultFlag);
+	}
+
+	m_I2C.read(m_addr, REG_ACCEL_STATUS, buff, 7, kI2C_TransferDefaultFlag);
+	return 0;
+//return (float(getAccAxis(REG_OUT_X_MSB))/4096.0);
 }
 
 float MMA8451Q::getAccY() {
@@ -74,15 +135,12 @@ int16_t MMA8451Q::getAccAxis(uint8_t addr) {
 }
 
 void MMA8451Q::readRegs(char registerAddress, uint8_t* data, int len) {
-   uint8_t t[1] = {registerAddress};
-    //m_i2c.write(m_addr, t, 1, true);
-   // m_i2c.read(m_addr, (char *)data, len);
-	m_I2C.write(m_addr, t, 1); // potrebujem kontaktovat akcelerometer aby mi dal hodotu z potrebneho registra [addr]
-	m_I2C.read(m_addr, data, len);
+//   uint8_t t[1] = {registerAddress};
+	//m_I2C.write(m_addr, t, 1); // potrebujem kontaktovat akcelerometer aby mi dal hodotu z potrebneho registra [addr]
+	//m_I2C.read(m_addr, data, len);
 }
 
 void MMA8451Q::writeRegs(uint8_t * data, int size) {
-   // m_i2c.write(m_addr, (char *)data, len);
-	m_I2C.write(m_addr, data, size);
+	//m_I2C.write(m_addr, data, size);
 
 }

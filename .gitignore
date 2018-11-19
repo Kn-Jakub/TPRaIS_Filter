@@ -1,4 +1,13 @@
-#git ignore for MCUXpresso project
+#Git Ignore for MCUXpresso project
+
+#Compiled object files
+*.o
+*.d
 
 #Directories
 .project
+.settings
+.cproject
+
+# Debug folder
+Debug/

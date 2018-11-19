@@ -49,7 +49,7 @@ all: TPRaIS_Semestralka.axf
 TPRaIS_Semestralka.axf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU C++ Linker'
-	arm-none-eabi-c++ -nostdlib -Xlinker -Map="TPRaIS_Semestralka.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -T "TPRaIS_Semestralka_Debug.ld" -o "TPRaIS_Semestralka.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-c++ -nostdlib -Xlinker -Map="TPRaIS_Semestralka.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -mcpu=cortex-m0plus -mthumb -T TPRaIS_Semestralka_Debug.ld -o "TPRaIS_Semestralka.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 	$(MAKE) --no-print-directory post-build

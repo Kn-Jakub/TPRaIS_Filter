@@ -11,3 +11,7 @@
 
 # Debug folder
 Debug/
+
+# JLink files
+*.launch
+*.mex

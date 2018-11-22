@@ -11,9 +11,11 @@
 #include "clock_config.h"
 #include "MKL25Z4.h"
 #include "fsl_debug_console.h"
+#include "fsl_pit.h"
 
 #include "MMA8451Q.h"
 #include "LED.h"
+#include "Timer.h"
 
 #define MMA8451_I2C_ADDRESS 0x1DU
 /*
@@ -30,25 +32,46 @@ void BOARD_INIT()
 	BOARD_InitDebugConsole();
 }
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+	volatile int flagIRQ = 0;
+	void PIT_IRQHandler(){
+		PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+		flagIRQ = 1;
+	}
+} //extern C
+
 int main(void)
 {
+	//pit_config_t config;
 	BOARD_INIT();
 
-    PRINTF("Hello World\n\r");
+
 
     LED_turnOn(RED);
 
+    Timer timer;
     MMA8451Q acc(MMA8451_I2C_ADDRESS);
+
+    timer.setTime(100000U);
+    timer.starTimer();
+
     uint8_t ret = acc.getWhoAmI();
     acc.init();
-    float x = acc.getAccX();
+    float x;
+    float y;
+    float z;
 
-    /* Enter an infinite loop, just incrementing a counter. */
-    char ch = 40;
+	//PRINTF("Accelerometer(%d) task:: \n\r", ret);
     while(1) {
-    	ch = GETCHAR();
-        PUTCHAR(ch);
-
+    	if(flagIRQ == 1){
+			x = acc.getAccX();
+			y = acc.getAccY();
+			z = acc.getAccZ();
+			PRINTF("%f, %f, %f \n\r",x,y,z);
+			flagIRQ = 0;
+    	}
     }
     PRINTF("END OF MAIN\n\r");
     return 0 ;

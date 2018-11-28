@@ -33,6 +33,10 @@ static const float alfa = (2*PI*DELTA_T*Fc)/((2*PI*DELTA_T*Fc) + 1) ; // low pas
 extern "C" {
 #endif
 	volatile int flagIRQ = 0;
+	float rawData[3]= {0, 0, 0};
+	float filtredData[3] = {0,0,0};
+	static float oldFiltredData[3] = {0,0,0};
+
 	void PIT_IRQHandler();
 } //extern C
 
@@ -45,10 +49,11 @@ MMA8451Q* accelerometer;
 // *** Main function ***
 int main(void)
 {
-    Timer timer;
-    accelerometer = new MMA8451Q(ACCELL_ADDRESS);
 
     BOARD_INIT();
+    Timer timer;
+    accelerometer = new MMA8451Q(ACCELL_ADDRESS);
+    accelerometer->init();
 
     timer.setTime((uint64_t)DELTA_T * 1000000);
     timer.starTimer();
@@ -70,9 +75,6 @@ void BOARD_INIT()
 }
 
 void PIT_IRQHandler(){
-	float rawData[3]= {0, 0, 0};
-	float filtredData[3] = {0,0,0};
-	static float oldFiltredData[3] = {0,0,0};
 
 	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 
@@ -87,13 +89,13 @@ float filterOneAxis(float input, float oldOutput)
 		return ((1 -alfa) * oldOutput + alfa * input);
 }
 
-void filter(float* rawData, float *oldData, float* newData)
+void filter(float* pRawData, float *pOldData, float* pNewData)
 {
 	for(int i = 0; i < 3; i++)
 	{
-		newData[i] = (((1 -alfa) * oldData[i]) + (alfa * rawData[i]));  //LOW
-		oldData[i] = newData[i];
-		newData[i] = rawData[i] - newData[i];
+		pNewData[i] = (((1 -alfa) * pOldData[i]) + (alfa * pRawData[i]));  //LOW
+		pOldData[i] = pNewData[i];
+		pNewData[i] = pRawData[i] - pNewData[i];
 	}
 
 }

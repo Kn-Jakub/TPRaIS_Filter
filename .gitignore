@@ -5,9 +5,9 @@
 *.d
 
 #Directories
-.project
-.settings
-.cproject
+#.project
+#.settings
+#.cproject
 
 # Debug folder
 Debug/

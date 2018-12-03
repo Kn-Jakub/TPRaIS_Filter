@@ -38,7 +38,7 @@ extern "C" {
 	float filtredData[3] = {0,0,0};
 	static float oldFiltredData[3] = {0,0,0};
 
-	//void PIT_IRQHandler();
+	void PIT_IRQHandler();
 	void PORTA_DriverIRQHandler(void);
 
 

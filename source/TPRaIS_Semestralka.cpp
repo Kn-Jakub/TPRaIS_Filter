@@ -4,6 +4,7 @@
  * @author	Jakub Pekár
  */
 
+#include <fsl_port.h>
 #include <stdio.h>
 #include <stdint-gcc.h>
 #include "board.h"
@@ -37,7 +38,10 @@ extern "C" {
 	float filtredData[3] = {0,0,0};
 	static float oldFiltredData[3] = {0,0,0};
 
-	void PIT_IRQHandler();
+	//void PIT_IRQHandler();
+	void PORTA_DriverIRQHandler(void);
+
+
 } //extern C
 
 void BOARD_INIT();
@@ -53,10 +57,12 @@ int main(void)
     BOARD_INIT();
     Timer timer;
     accelerometer = new MMA8451Q(ACCELL_ADDRESS);
-    accelerometer->init();
+//    accelerometer->init();
+    accelerometer->freefall();
+    EnableIRQ(PORTA_IRQn);
 
-    timer.setTime((uint64_t)DELTA_T * 1000000);
-    timer.starTimer();
+//    timer.setTime((uint64_t)DELTA_T * 1000000);
+//    timer.starTimer();
 
     while(1)
     {}
@@ -73,6 +79,29 @@ void BOARD_INIT()
 	/* Init FSL debug console. */
 	BOARD_InitDebugConsole();
 }
+
+void PORTA_DriverIRQHandler(void){
+
+	LED_turnOn(BLUE);
+	uint8_t retStatus;
+	accelerometer->readRegs(0x0C, &retStatus, 1);
+	if(retStatus == 0x04)
+		accelerometer->readRegs(0x16, &retStatus, 1);
+
+	uint32_t interFlags = PORT_GetPinsInterruptFlags(PORTA);
+	PORT_ClearPinsInterruptFlags(PORTA, BOARD_INITPINS_ACCEL_INT2_PIN);
+	PORT_ClearPinsInterruptFlags(PORTA, BOARD_INITPINS_ACCEL_INT1_PIN);
+	interFlags = PORT_GetPinsInterruptFlags(PORTA);
+	PRINTF("FREEEEE FAAALLLL [%d]!!!!!!\n\r", retStatus);
+};
+
+
+
+
+
+
+
+
 
 void PIT_IRQHandler(){
 

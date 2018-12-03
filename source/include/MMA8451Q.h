@@ -80,6 +80,8 @@ public:
    */
   void getAllAxis(float * res);
 
+  uint8_t readRegs(uint8_t regg, uint8_t* data, uint8_t size);
+
 
 
 private:

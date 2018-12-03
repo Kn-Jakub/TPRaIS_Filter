@@ -35,8 +35,9 @@
 #define REG_FF_CFG		0x15	//  [R/W] : 0		FF functional block configuration
 #define REG_FF_SRC		0x16	//  [R/W] : 0 		FF event source register
 #define REG_FF_THS      0x17 	//  [R/W] : 0 		FF threshold register
+#define REG_FF_COUNT	0x18
 #define REG_CTRL_REG_4  0x2D    //  [r/w] : 0		Interrupt enable register
-#define REG_CTFL_REG_5  0x2E    //  [R\W] : 0		Interrupt pin map (INT1/INT2)
+#define REG_CTRL_REG_5  0x2E    //  [R\W] : 0		Interrupt pin map (INT1/INT2)
 
 
 #define UINT14_MAX        		16383
@@ -83,7 +84,60 @@ void MMA8451Q::init()
 
 void MMA8451Q::freefall()
 {
+	/*  write 0010 0000 = 0x20 to accelerometer control register 1 */
+	/*  [7-6]: aslp_rate=00 */
+	/*  [5-3]: dr=100 for 50Hz data rate (when in hybrid mode) */
+	/*  [2]: lnoise=0 for normal/low noise mode */
+	/*  [1]: f_read=0 for normal 16 bit reads */
+	/*  [0]: active=0 to take the part out of standby and enable sampling */
+	uint8_t value = 0x20;
+	m_I2C.write(m_addr, REG_CTRL_REG_1, &value, 1);
 
+	/*  write 0010 0000 = 0x20 to  FF_CFG (0x15)*/
+	/*  [7]: ELE=1 */
+	/*  [6]: OAE=0 flag selection - freefall*/
+	/*  [5]: ZEFE=1 */
+	/*  [4]: YEFE=1 */
+	/*  [3]: ZEFE=1 */
+	value = 0xB8;
+	m_I2C.write(m_addr, REG_FF_CFG, &value, 1);
+
+	/*  write 0000 0011 = 0x03  to FF_THS (0x17)*/
+	/*  [7]: DBCNTM=0 0: increments or decrements debounce, 1: increments or clears counter */
+	/*  [6-1]: THS=3  Threshold freefall*/
+	value = 0x03;
+	m_I2C.write(m_addr, REG_FF_THS, &value, 1);
+
+	/*  write 0000 0110 = 0x06  to FF_THS (0x17)*/
+	/*  [7-1]: data=0x06 */
+	value = 0x06;
+	m_I2C.write(m_addr, REG_FF_COUNT, &value, 1);
+
+	/*  write 0000 0010 = 0x04  to CTRL_REG_4 (0x2D)*/
+	/*  [7]: INT_EN_ASLP  0: Auto-sleep/wake interrupt disabled; 1: Auto-sleep/wake interrupt enabled.*/
+	/*  [6]:  INT_EN_FIFO   */
+	/*  [5]: INT_EN_TRANS   */
+	/*  [4]:  INT_EN_LNDPRT   */
+	/*  [3]: INT_EN_PULSE   */
+	/*  [2]: INT_EN_FF_MT   */
+	/*  [0]: INT_EN_DRDY   */
+	value = 0x04;
+	m_I2C.write(m_addr, REG_CTRL_REG_4, &value, 1);
+
+	/*  write 0000 0010 = 0x04  to CTRL_REG_4 (0x2D)*/
+	/*  [7]: INT_CFG_ASLP  */
+	/*  [6]:  INT_CFG_FIFO 0: Interrupt is routed to INT2 pin; 1: Interrupt is routed to INT1 pin  */
+	/*  [5]: INT_CFG_TRANS   */
+	/*  [4]:  INT_CFG_LNDPRT   */
+	/*  [3]: INT_CFG_PULSE   */
+	/*  [2]: INT_CFG_FF_MT   */
+	/*  [0]: INT_CFG_DRDY   */
+	value = 0x00;
+	m_I2C.write(m_addr, REG_CTRL_REG_5, &value, 1);
+
+	m_I2C.read(m_addr, REG_CTRL_REG_1 , &value, 1);
+	value = 0x01;
+	m_I2C.write(m_addr, REG_CTRL_REG_1, &value, 1);
 }
 
 uint8_t MMA8451Q::getWhoAmI()
@@ -123,3 +177,9 @@ int16_t MMA8451Q::getAxis(uint8_t addr) {
 
     return acc;
 }
+
+uint8_t MMA8451Q::readRegs(uint8_t reg, uint8_t* data, uint8_t size)
+{
+	return m_I2C.read(m_addr, reg, data, size);
+}
+

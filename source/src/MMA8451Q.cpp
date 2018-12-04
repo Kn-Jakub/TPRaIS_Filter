@@ -28,7 +28,7 @@
 #define REG_OUT_Y_MSB     0x03	// [R]
 #define REG_OUT_Z_MSB     0x05	// [R]
 #define REG_XYZ			  0x0EU // [R/W] : 00000000 Data config
-#define REG_ACCEL_STATUS  0x00U	// [R] : 00000000 	Status register
+#define REG_ACCEL_STATUS  0x00U	// [R] 	 : 00000000 	Status register
 
 //REGISTERS FOR FREE FALL
 #define REG_INT_SOURCE 	0x0C 	// 	[R]   : 00000000 Interrupt status
@@ -81,11 +81,6 @@ void MMA8451Q::init()
 
 }
 
-void MMA8451Q::freefall()
-{
-
-}
-
 uint8_t MMA8451Q::getWhoAmI()
 {
 	uint8_t who_am_i = 0;
@@ -123,3 +118,5 @@ int16_t MMA8451Q::getAxis(uint8_t addr) {
 
     return acc;
 }
+
+

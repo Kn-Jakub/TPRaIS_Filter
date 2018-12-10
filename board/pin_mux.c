@@ -46,7 +46,7 @@ BOARD_InitPins:
   - {pin_num: '74', peripheral: GPIOD, signal: 'GPIO, 1', pin_signal: ADC0_SE5b/PTD1/SPI0_SCK/TPM0_CH1, direction: OUTPUT, gpio_init_state: 'true'}
   - {pin_num: '54', peripheral: GPIOB, signal: 'GPIO, 19', pin_signal: TSI0_CH12/PTB19/TPM2_CH1, direction: OUTPUT, gpio_init_state: 'true'}
   - {pin_num: '53', peripheral: GPIOB, signal: 'GPIO, 18', pin_signal: TSI0_CH11/PTB18/TPM2_CH0, direction: OUTPUT, gpio_init_state: 'true'}
-  - {pin_num: '34', peripheral: GPIOA, signal: 'GPIO, 14', pin_signal: PTA14/SPI0_PCS0/UART0_TX, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge}
+  - {pin_num: '34', peripheral: GPIOA, signal: 'GPIO, 14', pin_signal: PTA14/SPI0_PCS0/UART0_TX, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge, pull_enable: disable}
   - {pin_num: '35', peripheral: GPIOA, signal: 'GPIO, 15', pin_signal: PTA15/SPI0_SCK/UART0_RX, direction: INPUT, gpio_interrupt: kPORT_InterruptFallingEdge}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
@@ -112,6 +112,14 @@ void BOARD_InitPins(void)
 
     /* Interrupt configuration on PORTA14 (pin 34): Interrupt on falling edge */
     PORT_SetPinInterruptConfig(BOARD_INITPINS_ACCEL_INT1_PORT, BOARD_INITPINS_ACCEL_INT1_PIN, kPORT_InterruptFallingEdge);
+
+    PORTA->PCR[14] = ((PORTA->PCR[14] &
+                       /* Mask bits to zero which are setting */
+                       (~(PORT_PCR_PE_MASK | PORT_PCR_ISF_MASK)))
+
+                      /* Pull Enable: Internal pullup or pulldown resistor is not enabled on the corresponding
+                       * pin. */
+                      | PORT_PCR_PE(kPORT_PullDisable));
 
     /* PORTA15 (pin 35) is configured as PTA15 */
     PORT_SetPinMux(BOARD_INITPINS_ACCEL_INT2_PORT, BOARD_INITPINS_ACCEL_INT2_PIN, kPORT_MuxAsGpio);

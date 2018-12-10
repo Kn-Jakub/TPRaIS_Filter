@@ -58,7 +58,8 @@ int main(void)
     Timer timer;
     accelerometer = new MMA8451Q(ACCELL_ADDRESS);
 //    accelerometer->init();
-    accelerometer->freefall();
+//    accelerometer->freefall();
+    accelerometer->tapDetection();
     EnableIRQ(PORTA_IRQn);
 
 //    timer.setTime((uint64_t)DELTA_T * 1000000);
@@ -82,24 +83,16 @@ void BOARD_INIT()
 
 void PORTA_DriverIRQHandler(void){
 
-	LED_turnOn(BLUE);
+	LED_switch(BLUE);
 	uint8_t retStatus;
 	accelerometer->readRegs(0x0C, &retStatus, 1);
 	if(retStatus == 0x04)
+	{
 		accelerometer->readRegs(0x16, &retStatus, 1);
-
-	uint32_t interFlags = PORT_GetPinsInterruptFlags(PORTA);
-	PORT_ClearPinsInterruptFlags(PORTA, BOARD_INITPINS_ACCEL_INT2_PIN);
-	PORT_ClearPinsInterruptFlags(PORTA, BOARD_INITPINS_ACCEL_INT1_PIN);
-	interFlags = PORT_GetPinsInterruptFlags(PORTA);
+	}
+	PORT_ClearPinsInterruptFlags(PORTA, 1<<BOARD_INITPINS_ACCEL_INT2_PIN);
 	PRINTF("FREEEEE FAAALLLL [%d]!!!!!!\n\r", retStatus);
 };
-
-
-
-
-
-
 
 
 

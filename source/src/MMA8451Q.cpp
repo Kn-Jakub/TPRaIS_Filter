@@ -39,6 +39,17 @@
 #define REG_CTRL_REG_4  0x2D    //  [r/w] : 0		Interrupt enable register
 #define REG_CTRL_REG_5  0x2E    //  [R\W] : 0		Interrupt pin map (INT1/INT2)
 
+//REGISTER FOR TAP DETECTION
+#define REG_PULSE_CFG	0x21
+#define REG_PULSE_SRC 	0x22
+#define REG_PULSE_THSX	0x23
+#define REG_PULSE_THSY	0x24
+#define REG_PULSE_THSZ	0x25
+#define REG_PULSE_TMLT	0x26
+#define REG_PULSE_LTCY  0x27
+#define REG_PULSE_WIND	0x28
+#define REG_CTRL_REG_2  0x2B
+
 
 #define UINT14_MAX        		16383
 
@@ -137,6 +148,47 @@ void MMA8451Q::freefall()
 
 	m_I2C.read(m_addr, REG_CTRL_REG_1 , &value, 1);
 	value = 0x01;
+	m_I2C.write(m_addr, REG_CTRL_REG_1, &value, 1);
+}
+
+void MMA8451Q::tapDetection()
+{
+	uint8_t value = 0x00;
+	m_I2C.write(m_addr, REG_CTRL_REG_1, &value, 1);
+	value = 0x0C;
+	m_I2C.write(m_addr, REG_CTRL_REG_1, &value, 1);
+
+	value = 0x00;
+	m_I2C.write(m_addr, REG_XYZ, &value, 1);
+
+	value = 0x02;
+	m_I2C.write(m_addr, REG_CTRL_REG_2, &value, 1);
+
+	value = 0x15;
+	m_I2C.write(m_addr, REG_PULSE_CFG, &value, 1);
+
+	value = 0x20;
+	m_I2C.write(m_addr, REG_PULSE_THSX, &value, 1);
+
+	value = 0x20;
+	m_I2C.write(m_addr, REG_PULSE_THSY, &value, 1);
+
+	value = 0x2A;
+	m_I2C.write(m_addr, REG_PULSE_THSZ, &value, 1);
+
+	value = 0x28;
+	m_I2C.write(m_addr, REG_PULSE_TMLT, &value, 1);
+
+	value = 0x28;
+	m_I2C.write(m_addr, REG_PULSE_LTCY, &value, 1);
+
+	value = 0x08;
+	m_I2C.write(m_addr, REG_CTRL_REG_4, &value, 1);
+
+	value = 0x00;
+	m_I2C.write(m_addr, REG_CTRL_REG_5, &value, 1); //routed to INT2
+
+	value = 0x0D;
 	m_I2C.write(m_addr, REG_CTRL_REG_1, &value, 1);
 }
 

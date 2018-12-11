@@ -190,6 +190,8 @@ void MMA8451Q::tapDetection()
 
 	value = 0x0D;
 	m_I2C.write(m_addr, REG_CTRL_REG_1, &value, 1);
+
+	EnableIRQ(PORTA_IRQn);
 }
 
 uint8_t MMA8451Q::getWhoAmI()

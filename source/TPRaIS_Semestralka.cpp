@@ -19,6 +19,7 @@
 #include "include/MMA8451Q.h"
 #include "include/LED.h"
 #include "include/Timer.h"
+#include "include/sleep.h"
 
 #define ACCELL_ADDRESS 0x1DU
 
@@ -46,27 +47,24 @@ extern "C" {
 
 void BOARD_INIT();
 float filterOneAxis(float input, float oldOutput);
-void filter(float* rawData, float *oldData, float* newData);
+void filter(float* rawData, float* oldData, float* newData);
 
 MMA8451Q* accelerometer;
 
 // *** Main function ***
 int main(void)
 {
-
     BOARD_INIT();
     Timer timer;
     accelerometer = new MMA8451Q(ACCELL_ADDRESS);
-//    accelerometer->init();
-//    accelerometer->freefall();
     accelerometer->tapDetection();
-    EnableIRQ(PORTA_IRQn);
-
-//    timer.setTime((uint64_t)DELTA_T * 1000000);
-//    timer.starTimer();
-
+    PRINTF("It is time to sleep!\n\r");
+    //deepsleep();
     while(1)
-    {}
+    {
+    	LED_switch(RED);
+    	deepsleep();
+    }
 
     return 0 ;
 }
@@ -91,7 +89,8 @@ void PORTA_DriverIRQHandler(void){
 		accelerometer->readRegs(0x16, &retStatus, 1);
 	}
 	PORT_ClearPinsInterruptFlags(PORTA, 1<<BOARD_INITPINS_ACCEL_INT2_PIN);
-	PRINTF("FREEEEE FAAALLLL [%d]!!!!!!\n\r", retStatus);
+	PRINTF("Don`t Wake me up!!! [%d]!!!!!!\n\r", retStatus);
+	PRINTF("I go sleep. And it will be deep sleep.!!!!!!\n\r");
 };
 
 

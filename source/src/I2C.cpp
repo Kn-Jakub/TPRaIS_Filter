@@ -45,7 +45,7 @@ uint8_t I2C::write(uint8_t device_addr, uint8_t reg_addr, uint8_t*  value, uint8
 	m_MasterTransfer.flags = flags;
 
 	I2C_MasterTransferBlocking(I2C0, &m_MasterTransfer);
-
+	return 1;
 }
 
 uint8_t I2C::read(uint8_t device_addr, uint8_t reg_addr, uint8_t*  buff, uint8_t size, uint32_t flags)
